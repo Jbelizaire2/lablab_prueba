@@ -32,8 +32,7 @@
 <script src="{{ asset('build/jquery-ui.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 {# Notificacion de Error #}
-
-    <script type="text/javascript">
+ <script type="text/javascript">
         $(function() {
            
          $('.search').select2({placeholder: 'Seleccione', allowClear: true});
@@ -58,7 +57,6 @@ $( '.search' ).select2( {
        let textoseparado = check.toString().split(separador);
        tempValid.push(textoseparado[0]);
           }else  if (tempmArray.length == 2){
-
        let textoseparado = "P";
        tempValid.push(textoseparado);
           }else  if (tempmArray.length == 3){
@@ -67,16 +65,13 @@ $( '.search' ).select2( {
        tempValid.push(textoseparado);
           }
        
-
        if (tempmArray.length==3){
         myArray.push(tempmArray[2]);
         tempmArray=[];
         tempValid=[];
        }else if(tempmArray.length < 3){
         let res=(tempmArray.length - 3);
-
         let cont=(tempmArray.length-1);
-
         if (cont==0){
         if (tempValid[0]!=="R"){
             alert("Tiene que ser primero la region en el grupo");
@@ -89,18 +84,15 @@ $( '.search' ).select2( {
             console.log(tempValid)
         }
         }
-
          console.log("Falta:  "+res);
           
        }
       
-
   });
    //console.log(myArray);
  $('#textos').val(myArray); 
 $('#btnBuscar').on("click", function (e) {
 e.preventDefault();
-
 let check = $('#formaBuscar').val();
 let textos=$("#formaBuscar option:selected").text();
 //console.log(textos);
@@ -110,10 +102,8 @@ if (cant < 3 ) {
 alert("Minimo tiene que ser 3 numeros");
 return false;
 }
-
 let micant=$('#textos').val();
 let res=(micant % 3);
-
 if(res!=0){
 alert("Tiene que ser Multiple de 3 cantidad de datos");
 return false;
@@ -123,12 +113,9 @@ let arrP=[];
 let arrC=[];
 const groupBy = (x,f)=>x.reduce((a,b,i)=>((a[f(b,i,x)]||=[]).push(b),a),{});
 let news=groupBy(check, v => v[0]);
-
-
 arrR=news.R;
 arrP=news.P;
 arrC=news.C;
-
 let cantR=arrR.length;
 let cantP=arrP.length;
 let cantC=arrC.length;
@@ -136,7 +123,6 @@ let cantC=arrC.length;
 //console.log(arrP);
 //console.log(arrC);
 if(cantR ==cantP &&  cantP==cantC){
-
 var array = [];
 $.each(arrR,function(index, el) {
 let arrVAl = el.split('_');
@@ -144,22 +130,15 @@ let arrVAl1 = arrP[index].split('_');
 let arrVAl2 = arrC[index].split('_');
 me = {};
 me.name = 'Region '+arrVAl[2]+','+arrVAl1[2]+','+arrVAl2[2];
-
 array.push(me);
 });
-
-console.log(array);
+//console.log(array);
 }else{
 alert("Revisa que el tamaño de las regiones seleccionados provincias y comunas deben ser las mismas cantidades  ");
 return;
-
 }
-
-
-
 if (check.length > 1) {
 var midata={"name": array};
-
 $.ajax({
 url: "http://lablab.test/api/regiones/admin",
 dataType: "json",
@@ -167,28 +146,61 @@ data: (midata),
 type: "POST"
 }).done(function (response) {
     let tam=response.length;
-    let filas=(tam/3);
+    let filas=parseInt(tam/3);
     
 	//console.log(response);
-    tempmArray=[];
-    let rowtd="";
-    let rowtr=0;
-for (var i=0; i<tam; i++) {
+
+function grouper(array, cols) {
+    
+    function split(array, cols) {
+        if (cols==1) return array;
+        var size = Math.ceil(array.length / cols);
+        return array.slice(0, size).concat([null]).concat(split(array.slice(size), cols-1));
+    }
+
+    var a = split(array, cols);
+    var groups = [];
+    var group = [];
+    for(var i = 0; i < a.length; i++) {
+        if (a[i] === null) {
+            groups.push(group);
+            group = [];
+            continue;
+         }
+        group.push(a[i]);
+        
+    }
+    groups.push(group);
+    return groups;
+ 
+}
+
+let arregloNew=  grouper(response, filas);
+//console.log(arregloNew);
+ $('#boletasFound').html("");
+
+ var trHTML = "<table class='table table-hover' id='tableResult' style='table-layout: fixed; border-color: #fff'><tbody>";
+   var trHTML1="";
+for (var i=0; i<arregloNew.length; i++) {
    
-         console.log(response[i]);
-         $("#obtain").apend("<h2>"+response[i]+"</h2>");
+         //console.log(arregloNew[i]);
+       trHTML1 += "<tr>";
+      for (var j=0; j<arregloNew[i].length; j++) {
+            trHTML1 += "<td>" + arregloNew[i][j]  + "</td>";
         }
+        trHTML1 +="</tr>";
+        }
+        
+        trHTML +=trHTML1+"</tbody></table>";
+        $('#boletasFound').append(trHTML);
 
-           
 }).fail(function(xhr, err) { 
-
+      $('#boletasFound').html("");
     var responseTitle= $(xhr.responseText).filter('title').get(0);
     alert($(responseTitle).text() + "\n" + formatErrorMessage(xhr, err) ); 
 });
-
 return false;
 }
-
 });
         });
     </script>
